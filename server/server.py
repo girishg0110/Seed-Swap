@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request
-import time
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
-import os
+import os, time, json
 
 # MongoDB setup
 load_dotenv()
@@ -21,6 +20,7 @@ except Exception as e:
 
 # Flask setup
 app = Flask(__name__)
+        
 
 @app.route('/', methods=['GET', 'POST'])
 def index():    
@@ -40,19 +40,16 @@ def index():
             "offered_amt" : offered_amt, 
             "desired_seed" : desired_seed
         })
-
         return render_template('index.html', listings=collection_name)
-    print(collection_name.find_one()["_id"])
+    #return json.dumps(list(collection_name.find({})))
     return render_template('index.html', listings=collection_name)
 
 @app.route('/match', methods=['POST'])
 def offer():
     offer_id = request.form['offer_id']
-    print("id", offer_id)
-    collection_name.find
     offer = collection_name.find_one({'_id' : ObjectId(offer_id)})
-    print("offer:", offer)
     match_amt = request.form['matched_amt']
+    #return {"offer_id" : offer_id, "match_amt" : match_amt}
     return render_template('match.html', id=offer_id, 
                            offer=offer, 
                            match_amt=match_amt)
