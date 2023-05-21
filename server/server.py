@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
@@ -21,6 +21,14 @@ except Exception as e:
 # Flask setup
 app = Flask(__name__)
         
+def collectionToJson(collection):
+    collectedJson = []
+    for document in collection.find({}):
+        docJson = {}
+        for key in document:
+            docJson[key] = str(document[key])
+        collectedJson.append(docJson)
+    return {"data" : collectedJson}
 
 @app.route('/', methods=['GET', 'POST'])
 def index():    
@@ -42,7 +50,8 @@ def index():
         })
         return render_template('index.html', listings=collection_name)
     #return json.dumps(list(collection_name.find({})))
-    return render_template('index.html', listings=collection_name)
+    return collectionToJson(collection_name)
+    #return render_template('index.html', listings=collection_name)
 
 @app.route('/match', methods=['POST'])
 def offer():
