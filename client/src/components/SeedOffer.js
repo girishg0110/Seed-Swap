@@ -1,25 +1,26 @@
 import React from 'react'
 
 function SeedOffer(props) { 
+  var offer = props.offer_details
   return (
     <div className="row" style={{ marginBottom: "30px" }}>
       <div className="col">
         <h3 style={{ marginLeft: "50px" }}>
-          {props.offered_seed} for {props.desired_seed}
+          {offer.offered_seed} for {offer.desired_seed}
         </h3>
-        <h7 style={{ marginLeft: "50px" }}>Offerer: {props.proposer}</h7>
+        <h5 style={{ marginLeft: "50px" }}>Proposer: {offer.proposer_firstname + ' ' + offer.proposer_lastname}</h5>
       </div>
       <div className="col">
-        <div class="btn-group" style={{ marginLeft: "100px" }}>
+        <div className="btn-group" style={{ marginLeft: "100px" }}>
           <input
             type="text"
             className="form-control"
             aria-label="Text input with dropdown button"
           />
-          <a href="#" class="btn btn-success" aria-current="page">
+          <a href="#" className="btn btn-success" aria-current="page">
             Counteroffer
           </a>
-          <a href="#" class="btn btn-warning">
+          <a href="#" className="btn btn-warning">
             Match
           </a>
         </div>

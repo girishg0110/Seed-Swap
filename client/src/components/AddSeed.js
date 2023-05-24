@@ -2,54 +2,24 @@ import React, {useState, useEffect} from "react";
 import SeedOffer from './SeedOffer'
 
 function AddSeed(props) {
-  const [formState, updateFormState] = useState({
-    first_name: "",
-    last_name: "",
-    offered_seed: "",
+  const [formState, setFormState] = useState({
+    proposer_firstname: "",
+    proposer_lastname: "",
     offered_amt: "#",
+    offered_seed: "",
     desired_seed: "",
   });
 
-  const addListing = () => {
-    props.setSeedRows([
-      <SeedOffer
-        offered_seed={formState.offered_seed}
-        offered_amt={formState.offered_amt}
-        desired_seed={formState.desired_seed}
-        proposer={formState.first_name + " " + formState.last_name}
-      />,
-      ...props.seedRows]
-    );
-  }
-  const handleFirstName = (event) => {
+  const handleFormChange = (event, id) => {
     var newFormState = formState
-    newFormState["first_name"] = (event.target.value)
-    updateFormState(newFormState)
-    console.log(formState)
+    const idToField = {0 : 'proposer_firstname', 1:'proposer_lastname', 2:'offered_amt', 3:'offered_seed', 4:'desired_seed'}
+    newFormState[idToField[id]] = event.target.value
+    setFormState(newFormState)
   }
-  const handleLastName = (event) => {
-    var newFormState = formState;
-    newFormState["last_name"] = event.target.value;
-    updateFormState(newFormState);
-    console.log(formState);
-  };
-  const handleOfferedSeed = (event) => {
-    var newFormState = formState;
-    newFormState["offered_seed"] = event.target.value;
-    updateFormState(newFormState);
-    console.log(formState);
-  };
-  const handleDesiredSeed = (event) => {
-    var newFormState = formState;
-    newFormState["desired_seed"] = event.target.value;
-    updateFormState(newFormState);
-    console.log(formState);
-  };
-  const handleOfferedAmt = (event) => {
-    var newFormState = formState;
-    newFormState["offered_amt"] = event.target.value;
-    updateFormState(newFormState);
-    console.log(formState);
+
+  const addListing = () => {
+    const newOffer = formState
+    props.addOffer(newOffer);
   };
 
   var seedCountOptions = [<option selected>#</option>]
@@ -70,27 +40,32 @@ function AddSeed(props) {
           type="text"
           aria-label="First name"
           className="form-control"
-          onChange={handleFirstName}
+          onChange={(event) => handleFormChange(event, 0)}
         />
         <input
           type="text"
           aria-label="Last name"
           className="form-control"
-          onChange={handleLastName}
+          onChange={(event) => handleFormChange(event, 1)}
         />
       </div>
       <br />
       <div className="row">
         <div className="col">
           <div className="input-group mb-3">
-            <select class="form-select" id="inputGroupSelect01" onChange = {handleOfferedAmt}>
+            <select
+              class="form-select"
+              id="inputGroupSelect01"
+              onChange={(event) => handleFormChange(event, 2)}
+            >
               {seedCountOptions}
             </select>
             <input
               type="text"
               className="form-control"
-              aria-label="Text input with dropdown button"
-              onChange={handleOfferedSeed}
+              placeholder="Offered Seed"
+              aria-label="Offered Seed"
+              onChange={(event) => handleFormChange(event, 3)}
             />
             <span class="input-group-text">seeds</span>
           </div>
@@ -101,7 +76,7 @@ function AddSeed(props) {
             className="form-control"
             placeholder="Desired Seed"
             aria-label="Desired Seed"
-            onChange={handleDesiredSeed}
+            onChange={(event) => handleFormChange(event, 4)}
           />
         </div>
         <button class="btn btn-primary" type="button" onClick={addListing}>
