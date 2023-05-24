@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
-import os, time, json
+import os
 
 # MongoDB setup
 load_dotenv()
@@ -20,51 +20,33 @@ except Exception as e:
 
 # Flask setup
 app = Flask(__name__)
-        
-def collectionToJson(collection):
-    collectedJson = []
-    for document in collection.find({}):
-        docJson = {}
-        for key in document:
-            docJson[key] = str(document[key])
-        collectedJson.append(docJson)
-    return {"data" : collectedJson}
 
-@app.route('/', methods=['GET', 'POST'])
+def collectionToJson(collection, filter={}):
+    return [{key : str(document[key]) for key in document} for document in collection.find(filter)]
+
+@app.route('/offers', methods=['GET', 'POST'])
 def index():    
     if request.method == 'POST':
-        timestamp = time.time_ns()
-        offered_seed = request.form['offered_seed']
-        offered_amt = request.form['offered_amt']
-        desired_seed = request.form['desired_seed']
-        '''listings[timestamp] = {
-            "offered_seed" : offered_seed, 
-            "offered_amt" : offered_amt, 
-            "desired_seed" : desired_seed
-        }'''
-        #print(listings)
-        collection_name.insert_one({
-            "offered_seed" : offered_seed, 
-            "offered_amt" : offered_amt, 
-            "desired_seed" : desired_seed
-        })
-        return render_template('index.html', listings=collection_name)
-    #return json.dumps(list(collection_name.find({})))
-    return collectionToJson(collection_name)
-    #return render_template('index.html', listings=collection_name)
+        new_offer = request.get_json()
+        new_offer["bids"] = []
+        resp = offer_collection.insert_one(new_offer)
+
+        return jsonify(id = str(resp.inserted_id)), 200
+
+    return collectionToJson(offer_collection), 200
 
 @app.route('/match', methods=['POST'])
-def offer():
+def match():
     offer_id = request.form['offer_id']
-    offer = collection_name.find_one({'_id' : ObjectId(offer_id)})
     match_amt = request.form['matched_amt']
-    #return {"offer_id" : offer_id, "match_amt" : match_amt}
-    return render_template('match.html', id=offer_id, 
-                           offer=offer, 
-                           match_amt=match_amt)
+    bidder_name = request.form['bidder_firstname'] + request.form['bidder_lastname']
+    match_seed = request.form['matched_seed']
+    offer_collection.update_one({'_id' : ObjectId(offer_id)}, 
+                                jsonify(match_amt = match_amt, bidder = bidder_name, match_seed = match_seed))
+    return jsonify(id=offer_id), 200
 
 
 if __name__ == '__main__':
-    dbname = client["listings"]
-    collection_name = dbname["open_listings"]
+    db = client["seed-swap"]
+    offer_collection = db["offers"]
     app.run(debug=True)
